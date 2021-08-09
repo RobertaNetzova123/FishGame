@@ -60,7 +60,7 @@ class Player {
 
     draw() {
         if (mouse.click) {
-           this.drawLine();
+            this.drawLine();
         }
         this.drawCircle();
     }
@@ -76,7 +76,7 @@ class Player {
     drawCircle() {
         ctx.fillStyle = 'red';
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
         ctx.fill();
         ctx.closePath();
     }
@@ -86,11 +86,49 @@ const player = new Player();
 
 
 // Bubbles
+const bubblesArr = [];
+class Bubble {
+    constructor() {
+        this.x = Math.random() * canvas.width; // rand between 0 and width
+        this.y = Math.random() * canvas.height;
+        this.radius = 50;
+        this.speed = Math.random() * 5 + 1; // rand between 1 and 6
+        this.distance;
+    }
+
+    update() {
+        this.y -= this.speed;
+        
+    }
+
+    draw() {
+        ctx.fillStyle = 'blue';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.closePath();
+        ctx.stroke();
+    }
+}
+function handleBubbles() {
+    if (gameFrame % 50 == 0) { //true 50, 100, 150, etc.
+        bubblesArr.push(new Bubble());
+        console.log(bubblesArr.length);
+    }
+    bubblesArr.forEach(bubble => {
+        bubble.update();
+        bubble.draw();
+    });
+}
+
 // Animation Loop
 function animate() {
-    ctx.clearRect(0,0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    handleBubbles();
     player.update();
     player.draw();
+    gameFrame++;
+    //console.log(gameFrame);
     requestAnimationFrame(animate); // so it loops == recursion
 }
 animate();
