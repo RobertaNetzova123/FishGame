@@ -9,6 +9,12 @@ let score = 0;
 let gameFrame = 0;
 ctx.font = '50px Georgia';
 
+// SOUNDS
+const bubblePop1 = document.createElement('audio');
+const bubblePop2 = document.createElement('audio');
+bubblePop1.src = './Sounds/Plop.ogg';
+bubblePop2.src = './Sounds/bubbles-single1.wav';
+
 // Mouse interaction
 //js object
 //measures current size and position of canvas
@@ -24,7 +30,7 @@ canvas.addEventListener('mousedown', function (event) {
     mouse.click = true;
     mouse.x = event.x - canvasPosition.left;
     mouse.y = event.y - canvasPosition.top;
-    console.log(mouse.x, mouse.y);
+    //console.log(mouse.x, mouse.y);
 });
 
 canvas.addEventListener('mouseup', function () {
@@ -90,15 +96,20 @@ const bubblesArr = [];
 class Bubble {
     constructor() {
         this.x = Math.random() * canvas.width; // rand between 0 and width
-        this.y = Math.random() * canvas.height;
+        this.y = canvas.height + 100;
         this.radius = 50;
         this.speed = Math.random() * 5 + 1; // rand between 1 and 6
         this.distance;
+        this.counted =  false;
+        this.sound = Math.random() <= 0.5 ? bubblePop1 : bubblePop2;
     }
 
     update() {
         this.y -= this.speed;
-        
+        const dx = this.x - player.x;
+        const dy = this.y - player.y;
+        this.distance = Math.sqrt (dx*dx + dy*dy);
+
     }
 
     draw() {
@@ -110,15 +121,41 @@ class Bubble {
         ctx.stroke();
     }
 }
+
+
 function handleBubbles() {
     if (gameFrame % 50 == 0) { //true 50, 100, 150, etc.
         bubblesArr.push(new Bubble());
-        console.log(bubblesArr.length);
+       // console.log(bubblesArr.length);
     }
     bubblesArr.forEach(bubble => {
         bubble.update();
         bubble.draw();
     });
+    bubblesArr.forEach(bubble => {
+        // remove element if ist y is outside of the canvas
+        if (bubble.y < 0 - this.radius * 2) {
+            //bubble.delete();
+            bubblesArr.splice(bubblesArr.indexOf(bubble), 1);
+        }
+
+        if (bubble.distance < bubble.radius + player.radius) {
+            console.log("COLISION");
+            //can be used but not needed because we delete the bubble
+            //if (!bubble.counted) {
+            //     counted -> true
+            //     score++
+            //     splice
+            // }
+
+            score++;
+            bubble.counted = true;
+            bubblesArr.splice(bubblesArr.indexOf(bubble), 1);
+            bubble.sound.play();
+        }
+    });
+
+
 }
 
 // Animation Loop
@@ -127,8 +164,15 @@ function animate() {
     handleBubbles();
     player.update();
     player.draw();
+    printScore();
     gameFrame++;
     //console.log(gameFrame);
     requestAnimationFrame(animate); // so it loops == recursion
+}
+
+function printScore() {
+    ctx.fillStyle = 'black';
+    ctx.fillText('score: ' + score, 10,50); // where on the canvas
+
 }
 animate();
