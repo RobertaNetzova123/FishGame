@@ -37,6 +37,27 @@ canvas.addEventListener('mouseup', function () {
     mouse.click = false;
 });
 //Player
+var playerImg = new Image();
+var playerImgRight = new Image();
+playerImg.src = './Sprites/Fish/spritesheets/__cartoon_fish_06_yellow_swim.png';
+playerImgRight.src = './Sprites/Fish/spritesheets/__cartoon_fish_06_yellow_swim_right.png';
+
+//flip
+function flipHorizontally(img,x,y){
+    // move to x + img's width
+    ctx.translate(x+img.width,y);
+
+    // scaleX by -1; this "trick" flips horizontally
+    ctx.scale(-1,1);
+    
+    // draw the img
+    // no need for x,y since we've already translated
+   // ctx.drawImage(img,0,0);
+    
+    // always clean up -- reset transformations to default
+    ctx.setTransform(1,0,0,1,0,0);
+    return img;
+}
 
 class Player {
     constructor() {
@@ -47,8 +68,10 @@ class Player {
         this.frameX = 0;
         this.frameY = 0;
         // based on the sprite size
-        this.spriteWidth = 418;
-        this.spriteHeight = 397;
+        this.spritesheetWidth = 498;
+        this.spritesheetHeight = 327;
+        this.spriteWidth = this.spritesheetWidth/4;
+        this.spriteHeight = this.spritesheetHeight/4;
     }
 
     update() {
@@ -69,6 +92,7 @@ class Player {
             this.drawLine();
         }
         this.drawCircle();
+        this.drawSprite();
     }
 
     drawLine() {
@@ -85,6 +109,31 @@ class Player {
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
         ctx.fill();
         ctx.closePath();
+    }
+
+    drawSprite() {
+        // void ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+        var img;
+        if(this.x >= mouse.x) {
+            img = playerImg;
+        }
+        else {
+            img = playerImgRight;
+        }
+       //flipHorizontally(playerImg, this.x, this.y);
+        ctx.drawImage( img,
+            this.frameX * this.spritesheetWidth, 
+            this.frameY * this.spritesheetHeight,
+            this.spritesheetWidth,
+            this.spritesheetHeight,
+            this.x - this.spriteWidth/2, // center of a single sprite
+            this.y - this.spriteHeight/2,
+            this.spriteWidth,
+            this.spriteHeight
+            );
+
+            
+
     }
 }
 
@@ -159,7 +208,7 @@ function handleBubbles() {
 }
 
 // Animation Loop
-function animate() {
+function GameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     handleBubbles();
     player.update();
@@ -167,7 +216,7 @@ function animate() {
     printScore();
     gameFrame++;
     //console.log(gameFrame);
-    requestAnimationFrame(animate); // so it loops == recursion
+    requestAnimationFrame(GameLoop); // so it loops == recursion
 }
 
 function printScore() {
@@ -175,4 +224,4 @@ function printScore() {
     ctx.fillText('score: ' + score, 10,50); // where on the canvas
 
 }
-animate();
+GameLoop();
