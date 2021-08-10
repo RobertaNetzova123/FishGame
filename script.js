@@ -19,7 +19,7 @@ bubblePop2.src = './Sounds/bubbles-single1.wav';
 //js object
 //measures current size and position of canvas
 let canvasPosition = canvas.getBoundingClientRect();
-console.log(canvasPosition);
+//console.log(canvasPosition);
 const mouse = {
     x: canvas.width / 2,
     y: canvas.height / 2,
@@ -38,26 +38,25 @@ canvas.addEventListener('mouseup', function () {
 });
 //Player
 var playerImg = new Image();
-var playerImgRight = new Image();
+var playerImgFlip = new Image();
 playerImg.src = './Sprites/Fish/spritesheets/__cartoon_fish_06_yellow_swim.png';
-playerImgRight.src = './Sprites/Fish/spritesheets/__cartoon_fish_06_yellow_swim_right.png';
-
+playerImgFlip.src = 'Sprites/Fish/spritesheets/__cartoon_fish_06_yellow_swim_flip.png';
 //flip
-function flipHorizontally(img,x,y){
-    // move to x + img's width
-    ctx.translate(x+img.width,y);
+// function flipHorizontally(img, x, y) {
+//     // move to x + img's width
+//     ctx.translate(x + img.width, y);
 
-    // scaleX by -1; this "trick" flips horizontally
-    ctx.scale(-1,1);
-    
-    // draw the img
-    // no need for x,y since we've already translated
-   // ctx.drawImage(img,0,0);
-    
-    // always clean up -- reset transformations to default
-    ctx.setTransform(1,0,0,1,0,0);
-    return img;
-}
+//     // scaleX by -1; this "trick" flips horizontally
+//     ctx.scale(-1, 1);
+
+//     // draw the img
+//     // no need for x,y since we've already translated
+//     // ctx.drawImage(img,0,0);
+
+//     // always clean up -- reset transformations to default
+//     ctx.setTransform(1, 0, 0, 1, 0, 0);
+//     return img;
+// }
 
 class Player {
     constructor() {
@@ -70,13 +69,15 @@ class Player {
         // based on the sprite size
         this.spritesheetWidth = 498;
         this.spritesheetHeight = 327;
-        this.spriteWidth = this.spritesheetWidth/4;
-        this.spriteHeight = this.spritesheetHeight/4;
+        this.spriteWidth = this.spritesheetWidth / 4;
+        this.spriteHeight = this.spritesheetHeight / 4;
     }
 
     update() {
         const dx = this.x - mouse.x;
         const dy = this.y - mouse.y;
+
+        this.calculateRotationAngle(dy, dx);
 
         if (mouse.x != this.x) {
             this.x -= dx / 30; // to make it slower
@@ -85,8 +86,16 @@ class Player {
         if (mouse.y != this.y) {
             this.y -= dy / 30;
         }
-    }
 
+        //this.draw();
+    }
+    //rotation angle for the sprite
+    calculateRotationAngle(dy, dx) {
+        let theta = Math.atan2(dy, dx);
+        this.angle = theta;
+
+        //console.log( "Angle: "+ this.angle);
+    }
     draw() {
         if (mouse.click) {
             this.drawLine();
@@ -113,26 +122,33 @@ class Player {
 
     drawSprite() {
         // void ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+
         var img;
-        if(this.x >= mouse.x) {
+        if (this.x >= mouse.x) {
             img = playerImg;
         }
         else {
-            img = playerImgRight;
+            img = playerImgFlip;
         }
-       //flipHorizontally(playerImg, this.x, this.y);
-        ctx.drawImage( img,
-            this.frameX * this.spritesheetWidth, 
+
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.angle);
+        //flipHorizontally(playerImg, this.x, this.y);
+        ctx.drawImage(img,
+            this.frameX * this.spritesheetWidth,
             this.frameY * this.spritesheetHeight,
             this.spritesheetWidth,
             this.spritesheetHeight,
-            this.x - this.spriteWidth/2, // center of a single sprite
-            this.y - this.spriteHeight/2,
+            0 - this.spriteWidth / 2, // center of a single sprite
+            0 - this.spriteHeight / 2,
             this.spriteWidth,
             this.spriteHeight
-            );
+        );
 
-            
+        ctx.restore();
+
+
 
     }
 }
@@ -149,7 +165,7 @@ class Bubble {
         this.radius = 50;
         this.speed = Math.random() * 5 + 1; // rand between 1 and 6
         this.distance;
-        this.counted =  false;
+        this.counted = false;
         this.sound = Math.random() <= 0.5 ? bubblePop1 : bubblePop2;
     }
 
@@ -157,7 +173,7 @@ class Bubble {
         this.y -= this.speed;
         const dx = this.x - player.x;
         const dy = this.y - player.y;
-        this.distance = Math.sqrt (dx*dx + dy*dy);
+        this.distance = Math.sqrt(dx * dx + dy * dy);
 
     }
 
@@ -175,7 +191,7 @@ class Bubble {
 function handleBubbles() {
     if (gameFrame % 50 == 0) { //true 50, 100, 150, etc.
         bubblesArr.push(new Bubble());
-       // console.log(bubblesArr.length);
+        // console.log(bubblesArr.length);
     }
     bubblesArr.forEach(bubble => {
         bubble.update();
@@ -189,7 +205,7 @@ function handleBubbles() {
         }
 
         if (bubble.distance < bubble.radius + player.radius) {
-            console.log("COLISION");
+            // console.log("COLISION");
             //can be used but not needed because we delete the bubble
             //if (!bubble.counted) {
             //     counted -> true
@@ -221,7 +237,7 @@ function GameLoop() {
 
 function printScore() {
     ctx.fillStyle = 'black';
-    ctx.fillText('score: ' + score, 10,50); // where on the canvas
+    ctx.fillText('score: ' + score, 10, 50); // where on the canvas
 
 }
 GameLoop();
