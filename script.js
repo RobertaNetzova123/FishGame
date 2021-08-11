@@ -193,34 +193,28 @@ function handleBubbles() {
         bubblesArr.push(new Bubble());
         // console.log(bubblesArr.length);
     }
-    bubblesArr.forEach(bubble => {
-        bubble.update();
-        bubble.draw();
-    });
-    bubblesArr.forEach(bubble => {
-        // remove element if ist y is outside of the canvas
-        if (bubble.y < 0 - this.radius * 2) {
+
+    for (let i = 0; i < bubblesArr.length; i++) {
+
+        bubblesArr[i].update();
+        bubblesArr[i].draw();
+
+        if (bubblesArr[i].y < 0 - bubblesArr[i].radius * 2) {
             //bubble.delete();
-            bubblesArr.splice(bubblesArr.indexOf(bubble), 1);
+            bubblesArr.splice(i, 1);
+            i--;
         }
-
-        if (bubble.distance < bubble.radius + player.radius) {
-            // console.log("COLISION");
-            //can be used but not needed because we delete the bubble
-            //if (!bubble.counted) {
-            //     counted -> true
-            //     score++
-            //     splice
-            // }
-
+        // remove on collision
+        else if (bubblesArr[i].distance < bubblesArr[i].radius + player.radius) {
             score++;
-            bubble.counted = true;
-            bubblesArr.splice(bubblesArr.indexOf(bubble), 1);
-            bubble.sound.play();
+            //SOUND
+            //bubblesArr[i].sound.play();
+            bubblesArr.splice(i, 1);
+            i--;
+
         }
-    });
 
-
+    }
 }
 
 // Animation Loop
@@ -241,3 +235,7 @@ function printScore() {
 
 }
 GameLoop();
+
+window.addEventListener('resize', function () {
+    canvasPosition = canvas.getBoundingClientRect();
+});
